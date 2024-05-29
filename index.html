@@ -1,5 +1,24 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Directed Graph from CSV</title>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+</head>
+<body>
+    <div id="cy" style="width: 800px; height: 600px;"></div>
+    <script>
+
+        async function loadCSV(url) {
+            const response = await fetch(url);
+            const data = await response.text();
+            return data.split('\n').map(line => line.trim().split(','));
+        }
+
+
 async function createGraph() {
-    const csvData = await loadCSV('http://localhost:8000/data.csv');
+    const csvData = await loadCSV('http://localhost:5500/data.csv');
 
     var nodes = [];
     var edges = [];
@@ -64,9 +83,15 @@ async function createGraph() {
             }
         ],
         layout: {
-            name: 'grid',
+            name: 'euler',
             rows: 1
         }
     });
 }
+
+        createGraph();
+
+    </script>
+</body>
+</html>
 
