@@ -1,0 +1,4 @@
+data/*.csv
+!data/anonimized-data.csv
+!data/example-data.csv
+
