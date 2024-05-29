@@ -1,0 +1,72 @@
+async function createGraph() {
+    const csvData = await loadCSV('http://localhost:3000/path/to/your/csvfile.csv'); // Adjust URL as needed
+
+    var nodes = [];
+    var edges = [];
+    var usedSources = new Set();
+
+    // Parse CSV data
+    csvData.forEach((values, rowIndex) => {
+        var sourceNode = -1;
+        var targetNodes = [];
+
+        // First loop to identify the source node
+        values.forEach((value, index) => {
+            if (value === '2' && sourceNode === -1 && !usedSources.has(index)) {
+                sourceNode = index;
+                usedSources.add(index);
+            }
+        });
+
+        // Second loop to collect target nodes
+        if (sourceNode !== -1) {
+            values.forEach((value, index) => {
+                if (value === '1') {
+                    targetNodes.push(index);
+                }
+            });
+
+            // Add nodes and edges if valid source
+            nodes.push({ data: { id: `node_${sourceNode}` } });
+            targetNodes.forEach(target => {
+                edges.push({ data: { source: `node_${sourceNode}`, target: `node_${target}` } });
+                if (!nodes.some(node => node.data.id === `node_${target}`)) {
+                    nodes.push({ data: { id: `node_${target}` } });
+                }
+            });
+        }
+    });
+
+    // Initialize Cytoscape
+    var cy = cytoscape({
+        container: document.getElementById('cy'),
+        elements: {
+            nodes: nodes,
+            edges: edges
+        },
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'background-color': '#666',
+                    'label': 'data(id)'
+                }
+            },
+            {
+                selector: 'edge',
+                style: {
+                    'width': 3,
+                    'line-color': '#ccc',
+                    'target-arrow-color': '#ccc',
+                    'target-arrow-shape': 'triangle',
+                    'curve-style': 'bezier'
+                }
+            }
+        ],
+        layout: {
+            name: 'grid',
+            rows: 1
+        }
+    });
+}
+
