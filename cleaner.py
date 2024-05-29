@@ -1,7 +1,7 @@
 string_to_number = {
     'NO': 0,
     'SI': 1,
-    'SOY YO MISMO': 2
+    'SOY YO': 2
 }
 
 def process_data(input_file, output_file):
