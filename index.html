@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <title>Directed Graph from CSV</title>
     <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-euler"></script>
 </head>
 <body>
-    <div id="cy" style="width: 800px; height: 600px;"></div>
+    <div id="cy" style="width: 1000px; height: 700px;"></div>
     <script>
 
         async function loadCSV(url) {
@@ -68,7 +69,6 @@ async function createGraph() {
                 selector: 'node',
                 style: {
                     'background-color': '#666',
-                    'label': 'data(id)'
                 }
             },
             {
@@ -84,7 +84,25 @@ async function createGraph() {
         ],
         layout: {
             name: 'euler',
-            rows: 1
+            randomize: true,
+            springLength: edge => 80,
+            springCoeff: edge => 0.0008,
+            mass: node => 4,
+            gravity: -1.2,
+            pull: 0.001,
+            theta: 0.666,
+            dragCoeff: 0.02,
+            movementThreshold: 1,
+            timeStep: 20,
+            refresh: 10,
+            numIter: 1000,
+            maxSimulationTime: 1000,
+            ungrabifyWhileSimulating: false,
+            fit: true,
+            animate: true,
+            animationDuration: 500,
+            fixedAfterDragging: true,
+            noOverlap: true
         }
     });
 }
