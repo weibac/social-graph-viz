@@ -33,7 +33,7 @@
         }
 
         async function createGraph() {
-            const csvData = await loadCSV('http://localhost:5500/data/example-data.csv');
+            const csvData = await loadCSV('http://localhost:5500/data/clean.csv');
         
             var nodes = [];
             var edges = [];
@@ -88,10 +88,12 @@
                     {
                         selector: 'edge',
                         style: {
-                            'width': 1.5,
-                            'line-color': '#88F',
+                            'width': 1,
+                            'line-color': '#44F',
+                            'line-opacity': 0.9,
                             'target-arrow-color': '#F00',
                             'target-arrow-shape': 'triangle',
+                            'arrow-scale': 1.5,
                             'curve-style': 'bezier'
                         }
                     }
