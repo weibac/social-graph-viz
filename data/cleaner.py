@@ -18,8 +18,8 @@ def process_data(input_file, output_file, first_nonheader_line):
     for line in lines:
         if "No doy mi" in line:
             continue
-        if '\"SI, NO\"' in line:
-            line = line.replace('\"SI, NO\"', "NO") # Se asume que indecisión es NO.
+        if '\"SI, NO\"' in line: # Students picking both YES and NO (frontend error on our part) are assumed to be indecisive and counted as having responded NO
+            line = line.replace('\"SI, NO\"', "NO")
         columns = line.strip().split(',')
         columns = columns[2:]
         new_columns = [string_to_number.get(col, col) for col in columns]
