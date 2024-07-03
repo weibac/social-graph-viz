@@ -1,11 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Directed Graph from CSV</title>
     <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
-    <script src="https://unpkg.com/cytoscape-euler"></script>
+    <!-- euler layout -->
+    <script src="https://unpkg.com/cytoscape-euler"></script> 
+    <!-- cola layout -->
+    <script src="https://unpkg.com/webcola/WebCola/cola.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-cola/cytoscape-cola.js"></script>
     <style>
     #cy {
         width: 100%;
@@ -18,8 +21,9 @@
     }
     </style>
 </head>
+
 <body>
-    <div id="cy"></div>
+    <div id="cy">
     <script>
 
         async function loadCSV(url) {
@@ -28,105 +32,120 @@
             return data.split('\n').map(line => line.trim().split(','));
         }
 
-
-async function createGraph() {
-    const csvData = await loadCSV('http://localhost:5500/data.csv');
-
-    var nodes = [];
-    var edges = [];
-    var usedSources = new Set();
-
-    // Parse CSV data
-    csvData.forEach((values, rowIndex) => {
-        var sourceNode = -1;
-        var targetNodes = [];
-
-        // First loop to identify the source node
-        values.forEach((value, index) => {
-            if (value === '2' && sourceNode === -1 && !usedSources.has(index)) {
-                sourceNode = index;
-                usedSources.add(index);
-            }
-        });
-
-        // Second loop to collect target nodes
-        if (sourceNode !== -1) {
-            values.forEach((value, index) => {
-                if (value === '1') {
-                    targetNodes.push(index);
+        async function createGraph() {
+            const csvData = await loadCSV('http://localhost:5500/data/example-data.csv');
+        
+            var nodes = [];
+            var edges = [];
+            var usedSources = new Set();
+        
+            // Parse CSV data
+            csvData.forEach((values, rowIndex) => {
+                var sourceNode = -1;
+                var targetNodes = [];
+            
+                // First loop to identify the source node
+                values.forEach((value, index) => {
+                    if (value === '2' && sourceNode === -1 && !usedSources.has(index)) {
+                        sourceNode = index;
+                        usedSources.add(index);
+                    }
+                });
+            
+                // Second loop to collect target nodes
+                if (sourceNode !== -1) {
+                    values.forEach((value, index) => {
+                        if (value === '1') {
+                            targetNodes.push(index);
+                        }
+                    });
+                
+                    // Add nodes and edges if valid source
+                    nodes.push({ data: { id: `node_${sourceNode}` } });
+                    targetNodes.forEach(target => {
+                        edges.push({ data: { source: `node_${sourceNode}`, target: `node_${target}` } });
+                        if (!nodes.some(node => node.data.id === `node_${target}`)) {
+                            nodes.push({ data: { id: `node_${target}` } });
+                        }
+                    });
                 }
             });
+        
+            // Initialize Cytoscape
+            var cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: {
+                    nodes: nodes,
+                    edges: edges
+                },
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#333',
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 1.5,
+                            'line-color': '#88F',
+                            'target-arrow-color': '#F00',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier'
+                        }
+                    }
+                ],
 
-            // Add nodes and edges if valid source
-            nodes.push({ data: { id: `node_${sourceNode}` } });
-            targetNodes.forEach(target => {
-                edges.push({ data: { source: `node_${sourceNode}`, target: `node_${target}` } });
-                if (!nodes.some(node => node.data.id === `node_${target}`)) {
-                    nodes.push({ data: { id: `node_${target}` } });
+                layout: {
+                    name: 'circle',
                 }
+
+//                layout: {
+//                    name: 'euler',
+//                    randomize: true,
+//                    springLength: edge => 1000,
+//                    springCoeff: edge => 0.0008,
+//                    mass: node => 4,
+//                    gravity: -1.2,
+//                    pull: 0.001,
+//                    theta: 0.666,
+//                    dragCoeff: 0.02,
+//                    movementThreshold: 1,
+//                    timeStep: 20,
+//                    refresh: 10,
+//                    numIter: 10000,
+//                    maxSimulationTime: 10000,
+//                    ungrabifyWhileSimulating: false,
+//                    fit: true,
+//                    animate: true,
+//                    animationDuration: 500,
+//                    fixedAfterDragging: false,
+//                    noOverlap: true
+//                }
+
+//                layout: {
+//                    name: 'cola',
+//                    nodeSpacing: 100,
+//                    edgeLengthVal: 45,
+//                    animate: true,
+//                    refresh: 20,
+//                    maxSimulationTime: 8000,
+//                    ungrabifyWhileSimulating: true,
+//                    fit: true
+//                }
             });
         }
-    });
-
-    // Initialize Cytoscape
-    var cy = cytoscape({
-        container: document.getElementById('cy'),
-        elements: {
-            nodes: nodes,
-            edges: edges
-        },
-        style: [
-            {
-                selector: 'node',
-                style: {
-                    'background-color': '#666',
-                }
-            },
-            {
-                selector: 'edge',
-                style: {
-                    'width': 3,
-                    'line-color': '#ccc',
-                    'target-arrow-color': '#ccc',
-                    'target-arrow-shape': 'triangle',
-                    'curve-style': 'bezier'
-                }
-            }
-        ],
-        layout: {
-            name: 'euler',
-            randomize: true,
-            springLength: edge => 80,
-            springCoeff: edge => 0.0008,
-            mass: node => 4,
-            gravity: -1.2,
-            pull: 0.001,
-            theta: 0.666,
-            dragCoeff: 0.02,
-            movementThreshold: 1,
-            timeStep: 20,
-            refresh: 10,
-            numIter: 1000,
-            maxSimulationTime: 10000,
-            ungrabifyWhileSimulating: false,
-            fit: true,
-            animate: true,
-            animationDuration: 500,
-            fixedAfterDragging: false,
-            noOverlap: true
-        }
-    });
-}
 
         // Resize the Cytoscape canvas when the window is resized
         window.addEventListener('resize', function() {
             cy.resize();
         });
 
-
         createGraph();
 
     </script>
+    </div>
+
 </body>
 </html>
-
