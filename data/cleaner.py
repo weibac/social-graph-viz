@@ -12,7 +12,7 @@ def process_data(input_file, output_file, first_nonheader_line):
     with open(input_file, 'r') as file:
         lines = file.readlines()
     
-    lines = lines[first_nonheader_line:]
+    lines = lines[first_nonheader_line - 1:]
     
     cleaned_data = []
     for line in lines:
